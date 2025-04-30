@@ -1,0 +1,6 @@
+OBS Studio V27.2.4
+Für Webcam auf multiple cams aufsplitten
+https://www.filehorse.com/download-obs-studio-64/70331/download/
+Virtual Camera Plug In
+Um verschiedene Virtuelle Kameras zu haben und in OBS zu bespielen
+https://github.com/CatxFish/obs-virtual-cam

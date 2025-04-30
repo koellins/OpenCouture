@@ -1,0 +1,13 @@
+set up obs setup:
+create in one scene 2 video capture sources
+first take webcam as input and stream to virtual cam 1,2,3
+second take obs virtual camera input and add filter virtual cam to stream to virtual cam 4
+
+in python:
+run script to use virtual cam 1, do analyse and send modified image to obs virtual camera - that is mapped on vitual cam 4
+
+
+
+
+help:
+https://github.com/Danial-Kord/DigiHuman?tab=readme-ov-file
