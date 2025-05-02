@@ -4,6 +4,8 @@ import struct
 import json
 import mediapipe as mp
 import numpy as np
+import time
+import threading
 
 # Ziel-IP und Port für Unreal
 UDP_IP = "127.0.0.1"  # Unreal Engine PC
@@ -20,6 +22,14 @@ pose = mp_pose.Pose(model_complexity=1, min_detection_confidence=0.5, min_tracki
 
 # Starte die Webcam
 cap = cv2.VideoCapture(0)
+cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1920)
+cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 1080)
+if(not int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))==1920):
+    print('no 1080p cam!')
+    cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
+    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
+if(not int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))==1280):
+    print('no 720p cam!')
 width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
 height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 print (width)
@@ -29,16 +39,21 @@ print ('^height')
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
+def send_image_async(image, send_id, udp_port): # Send image in other thread to not block program
+    threading.Thread(
+        target=send_image_in_chunks,
+        args=(image, send_id, udp_port),
+        daemon=True  # Thread wird beendet, wenn das Programm stoppt
+    ).start()
+
 def send_image_in_chunks(image, send_id, udp_port):
-    _, buffer = cv2.imencode('.jpg', image, [cv2.IMWRITE_JPEG_QUALITY, 90])
+    _, buffer = cv2.imencode('.jpg', image, [cv2.IMWRITE_JPEG_QUALITY, 80])
     data = buffer.tobytes()
 
     image_id = np.random.randint(0, 2**31 - 1, dtype=np.int32)  # uint32
     num_packets = (len(data) + MAX_PACKET_SIZE - 1) // MAX_PACKET_SIZE
 
     for i in range(num_packets):
-        if(send_id == 2):
-            print(i)
         start = i * MAX_PACKET_SIZE
         end = min(start + MAX_PACKET_SIZE, len(data))
         chunk = data[start:end]
@@ -48,17 +63,31 @@ def send_image_in_chunks(image, send_id, udp_port):
         header = struct.pack("<IHHH", image_id, i, num_packets, payload_size)
         sock.sendto(header + chunk, (UDP_IP, udp_port))
 
+def log_time(label, start_time):
+    elapsed = (time.time() - start_time) * 1000  # ms
+    print(f"[⏱️ {label}] {elapsed:.2f} ms")
+
 while cap.isOpened():
+    total_start = time.time()
+    step_start = time.time()
+
     ret, frame = cap.read()
+    log_time("Frame read", step_start)
     if not ret:
         print("❌ Kein Bild erhalten!")
         break
 
+    step_start = time.time()
     image_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+    log_time("Convert BGR to RGB", step_start)
+
     #pose
     masked_frame = np.zeros((height, width), dtype=np.uint8)
     # **Pose-Tracking**
+    step_start = time.time()
     results = pose.process(image_rgb)
+    log_time("Pose Estimation", step_start)
+    step_start = time.time()
     if results.pose_landmarks:
         tracking_data = {}
         tracking_dataWorldCoor = {}
@@ -89,14 +118,16 @@ while cap.isOpened():
         sendID = 4 # trackingData
         sock.sendto(struct.pack(">BI", sendID, size_json), (UDP_IP, UDP_PORT_TRACKING))
         sock.sendto(json_bufferW, (UDP_IP, UDP_PORT_TRACKING))
-    
+    log_time("Build and sent tracking_data", step_start)
     if results.segmentation_mask is not None:
         mask = results.segmentation_mask  # Float32 Werte von 0.0 - 1.0
         mask = (mask * 255).astype(np.uint8)  # Skaliert auf 0 - 255
         masked_frame = mask
     #   masked_frame = cv2.cvtColor(mask, cv2.COLOR_GRAY2BGR)  # Graustufen in 3-Kanal-Bild umwandeln
 
-    send_image_in_chunks(masked_frame, 3, UDP_PORT_MASK)
+    step_start = time.time()
+    send_image_async(masked_frame, 3, UDP_PORT_MASK)
+    log_time("Send Mask", step_start)
     # # Bild komprimieren
     # _, buffer = cv2.imencode('.jpg', masked_frame, [cv2.IMWRITE_JPEG_QUALITY, 90])
     
@@ -107,7 +138,9 @@ while cap.isOpened():
     # # Bilddaten senden
     # sock.sendto(buffer, (UDP_IP, UDP_PORT_MASK))
 
-    send_image_in_chunks(frame, 2, UDP_PORT_WEBCAM)
+    step_start = time.time()
+    send_image_async(frame, 2, UDP_PORT_WEBCAM)
+    log_time("Send Webcam", step_start)
     # #webcam
     # _, bufferWeb = cv2.imencode('.jpg', frame, [cv2.IMWRITE_JPEG_QUALITY, 80])
     # sizeWeb = len(bufferWeb)
@@ -117,7 +150,9 @@ while cap.isOpened():
     
 
     # Vorschau anzeigen
+    step_start = time.time()
     cv2.imshow("Webcam", masked_frame)
+    log_time("Display Mask", step_start)
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
 
