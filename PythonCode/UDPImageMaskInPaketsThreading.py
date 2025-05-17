@@ -26,7 +26,7 @@ pose = mp_pose.Pose(model_complexity=1, min_detection_confidence=0.5, min_tracki
 
 
 # Starte die Webcam
-cap = cv2.VideoCapture(3)
+cap = cv2.VideoCapture(0)
 cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1920)
 cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 1080)
 if(not int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))==1920):
