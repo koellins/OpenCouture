@@ -22,7 +22,7 @@ latest_frame_for_pose = None
 result_queue = queue.Queue(maxsize = 2)
 
 mp_pose = mp.solutions.pose
-pose = mp_pose.Pose(model_complexity=1, min_detection_confidence=0.5, min_tracking_confidence=0.5, enable_segmentation = True)
+pose = mp_pose.Pose(model_complexity=0, min_detection_confidence=0.5, min_tracking_confidence=0.5, enable_segmentation = True)
 
 
 # Starte die Webcam
