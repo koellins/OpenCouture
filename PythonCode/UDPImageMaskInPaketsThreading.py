@@ -92,6 +92,8 @@ while cap.isOpened():
     total_start = time.time()
     step_start = time.time()
     ret, frame = cap.read()
+    if ret:         # Rot image uncomment to canel!
+        frame = cv2.rotate(frame, cv2.ROTATE_90_COUNTERCLOCKWISE)
     latest_frame_for_pose = frame
     log_time("Frame read", step_start)
 
@@ -108,7 +110,7 @@ while cap.isOpened():
         results, frame_with_pose = result_queue.get_nowait()
     
     #pose
-    masked_frame = np.zeros((height, width), dtype=np.uint8)
+    masked_frame = np.zeros((width, height), dtype=np.uint8)
 
     # step_start = time.time()
     # image_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
