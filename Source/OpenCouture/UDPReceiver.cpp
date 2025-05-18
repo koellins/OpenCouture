@@ -286,7 +286,7 @@ void AUDPReceiver::RecvWebcam(TArray<uint8> Data)
 	UTexture2D* WebcamTex = FImageUtils::ImportBufferAsTexture2D(Data);
 	if (WebcamTex)
 	{
-		UE_LOG(LogTemp, Log, TEXT("Bild empfangen und konvertiert!"));
+		//UE_LOG(LogTemp, Log, TEXT("Bild empfangen und konvertiert!"));
 		OnWebcam.Broadcast(WebcamTex);
 	}
 }
@@ -295,7 +295,7 @@ void AUDPReceiver::RecvMask(TArray<uint8> Data)
 	UTexture2D* MaskTex = FImageUtils::ImportBufferAsTexture2D(Data);
 	if (MaskTex)
 	{
-		UE_LOG(LogTemp, Log, TEXT("Bild empfangen und konvertiert!"));
+		//UE_LOG(LogTemp, Log, TEXT("Bild empfangen und konvertiert!"));
 		OnMaskReceived.Broadcast(MaskTex);
 	}
 }
@@ -304,7 +304,7 @@ void AUDPReceiver::RecvTracking(TArray<uint8> Data)
 	Data.Add(0);
 
 	FString ReceivedString = FString(UTF8_TO_TCHAR(reinterpret_cast<const char*>(Data.GetData())));
-	UE_LOG(LogTemp, Log, TEXT("Empfangene Daten: %s"), *ReceivedString);
+	//UE_LOG(LogTemp, Log, TEXT("Empfangene Daten: %s"), *ReceivedString);
 	OnCoordinatesReceived.Broadcast(ReceivedString);
 }
 void AUDPReceiver::RecvTrackingWorld(TArray<uint8> Data)
@@ -312,7 +312,7 @@ void AUDPReceiver::RecvTrackingWorld(TArray<uint8> Data)
 	Data.Add(0);
 
 	FString ReceivedString = FString(UTF8_TO_TCHAR(reinterpret_cast<const char*>(Data.GetData())));
-	UE_LOG(LogTemp, Log, TEXT("Empfangene Daten: %s"), *ReceivedString);
+	//UE_LOG(LogTemp, Log, TEXT("Empfangene Daten: %s"), *ReceivedString);
 	OnCoordinatesWorldReceived.Broadcast(ReceivedString);
 }
 
