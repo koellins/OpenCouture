@@ -26,7 +26,7 @@ pose = mp_pose.Pose(model_complexity=0, min_detection_confidence=0.5, min_tracki
 
 
 # Starte die Webcam
-cap = cv2.VideoCapture(0)
+cap = cv2.VideoCapture(1)
 cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1920)
 cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 1080)
 if(not int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))==1920):
@@ -92,8 +92,9 @@ while cap.isOpened():
     total_start = time.time()
     step_start = time.time()
     ret, frame = cap.read()
-    if ret:         # Rot image uncomment to canel!
-        frame = cv2.rotate(frame, cv2.ROTATE_90_COUNTERCLOCKWISE)
+    # if ret:         # Rot image uncomment to canel!
+        # frame = cv2.rotate(frame, cv2.ROTATE_90_COUNTERCLOCKWISE)
+        # frame = cv2.rotate(frame, cv2.ROTATE_90_CLOCKWISE)
     latest_frame_for_pose = frame
     log_time("Frame read", step_start)
 
