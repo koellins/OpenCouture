@@ -26,7 +26,7 @@ pose = mp_pose.Pose(model_complexity=0, min_detection_confidence=0.5, min_tracki
 
 
 # Starte die Webcam
-cap = cv2.VideoCapture(1)
+cap = cv2.VideoCapture(0)
 cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1920)
 cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 1080)
 if(not int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))==1920):
@@ -111,7 +111,7 @@ while cap.isOpened():
         results, frame_with_pose = result_queue.get_nowait()
     
     #pose
-    masked_frame = np.zeros((width, height), dtype=np.uint8)
+    masked_frame = np.zeros((height,width), dtype=np.uint8)
 
     # step_start = time.time()
     # image_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
@@ -194,7 +194,7 @@ while cap.isOpened():
 
     # Vorschau anzeigen
     step_start = time.time()
-    cv2.imshow("Webcam", masked_frame)
+    cv2.imshow("Webcam", frame)
     log_time("Display Mask", step_start)
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
