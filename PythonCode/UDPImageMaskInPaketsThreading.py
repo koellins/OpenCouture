@@ -92,9 +92,7 @@ while cap.isOpened():
     total_start = time.time()
     step_start = time.time()
     ret, frame = cap.read()
-    # if ret:         # Rot image uncomment to canel!
-        # frame = cv2.rotate(frame, cv2.ROTATE_90_COUNTERCLOCKWISE)
-        # frame = cv2.rotate(frame, cv2.ROTATE_90_CLOCKWISE)
+
     latest_frame_for_pose = frame
     log_time("Frame read", step_start)
 
@@ -113,15 +111,6 @@ while cap.isOpened():
     #pose
     masked_frame = np.zeros((height,width), dtype=np.uint8)
 
-    # step_start = time.time()
-    # image_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-    # log_time("Convert BGR to RGB", step_start)
-    # # **Pose-Tracking**
-    # step_start = time.time()
-    # results = pose.process(image_rgb)
-    # log_time("Pose Estimation", step_start)
-    # step_start = time.time()
-
     if results is not None and results.pose_landmarks:
         tracking_data = {}
         tracking_dataWorldCoor = {}
@@ -130,14 +119,18 @@ while cap.isOpened():
         _z = 6
         for i, landmark in enumerate(results.pose_landmarks.landmark):
             _vis = str(landmark.visibility).ljust(6, '0')[_s:_e]
-            if(landmark.x > 1 or landmark.x < 0 or landmark.y > 1 or landmark.y < 0):
+            if(landmark.x >= 1 or landmark.x <= 0 or landmark.y >= 1 or landmark.y <= 0):
                 _vis = "0.0"
             tracking_data[f"{str(i).zfill(2)}"] = [str(landmark.x).ljust(6, '0')[_s:_e], str(landmark.y).ljust(6, '0')[_s:_e],str(landmark.z).ljust(6, '0')[:_z], _vis]
             # if(i == 17):
             #     print(f"vis: {landmark.visibility}  x: {landmark.x}  y: {landmark.y}")
+            # if (i == 0):
+            #    print( _vis)
         
         for i, landmarkW in enumerate(results.pose_world_landmarks.landmark):
             tracking_dataWorldCoor[f"{str(i)}"] = [str(landmarkW.x)[0:8], str(landmarkW.y)[0:8],str(landmarkW.z)[0:_z], str(landmarkW.visibility)[0:_e]]
+            # if(i == 0):
+            #     print( str(landmarkW.visibility)[0:_e])
 #Send ImageCoordinates  combined!
         combined_tracking_data = {"tracking":tracking_data, "world":tracking_dataWorldCoor}
         json_dataC = json.dumps(combined_tracking_data) + "\n"  # JSON mit Trennzeichen
@@ -147,50 +140,22 @@ while cap.isOpened():
         sock.sendto(struct.pack(">BI", sendID, size_jsonC), (UDP_IP, UDP_PORT_TRACKING))
         sock.sendto(json_bufferC, (UDP_IP, UDP_PORT_TRACKING))
 
-#         json_data = json.dumps(tracking_data) + "\n"  # JSON mit Trennzeichen
-#         json_buffer = json_data.encode('utf-8')
-#         size_json = len(json_buffer)
-#         sendID = 1 # trackingData
-#         sock.sendto(struct.pack(">BI", sendID, size_json), (UDP_IP, UDP_PORT_TRACKING))
-#         sock.sendto(json_buffer, (UDP_IP, UDP_PORT_TRACKING))
-# #Send World Coordinates
-#         json_dataW = json.dumps(tracking_dataWorldCoor) + "\n"  # JSON mit Trennzeichen
-#         json_bufferW = json_dataW.encode('utf-8')
-#         size_json = len(json_bufferW)
-#         sendID = 4 # trackingData
-#         sock.sendto(struct.pack(">BI", sendID, size_json), (UDP_IP, UDP_PORT_TRACKING))
-#         sock.sendto(json_bufferW, (UDP_IP, UDP_PORT_TRACKING))
     log_time("Build and sent tracking_data", step_start)
     if results is not None and results.segmentation_mask is not None:
         mask = results.segmentation_mask  # Float32 Werte von 0.0 - 1.0
         mask = (mask * 255).astype(np.uint8)  # Skaliert auf 0 - 255
         masked_frame = mask
-    #   masked_frame = cv2.cvtColor(mask, cv2.COLOR_GRAY2BGR)  # Graustufen in 3-Kanal-Bild umwandeln
+
+    if results is None:
+        print("No result!")
 
     step_start = time.time()
     send_image_async(masked_frame, 3, UDP_PORT_MASK)
     log_time("Send Mask", step_start)
-    # # Bild komprimieren
-    # _, buffer = cv2.imencode('.jpg', masked_frame, [cv2.IMWRITE_JPEG_QUALITY, 90])
-    
-    # # Länge des Buffers senden
-    # size = len(buffer)
-    # sendID = 3 #mask = 3
-    # sock.sendto(struct.pack(">BI", sendID, size), (UDP_IP, UDP_PORT_MASK))
-    # # Bilddaten senden
-    # sock.sendto(buffer, (UDP_IP, UDP_PORT_MASK))
 
     step_start = time.time()
     # send_image_async(frame, 2, UDP_PORT_WEBCAM)
     log_time("Send Webcam", step_start)
-
-    # #webcam
-    # _, bufferWeb = cv2.imencode('.jpg', frame, [cv2.IMWRITE_JPEG_QUALITY, 80])
-    # sizeWeb = len(bufferWeb)
-    # sendID = 2 # webcam stream
-    # sock.sendto(struct.pack(">BI", sendID, sizeWeb), (UDP_IP, UDP_PORT_WEBCAM))
-    # sock.sendto(bufferWeb, (UDP_IP, UDP_PORT_WEBCAM))
-    
 
     # Vorschau anzeigen
     step_start = time.time()
