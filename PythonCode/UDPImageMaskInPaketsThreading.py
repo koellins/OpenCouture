@@ -159,7 +159,7 @@ while cap.isOpened():
 
     # Vorschau anzeigen
     step_start = time.time()
-    cv2.imshow("Webcam", frame)
+    # cv2.imshow("Webcam", frame)
     log_time("Display Mask", step_start)
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
