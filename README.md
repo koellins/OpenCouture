@@ -32,6 +32,6 @@ OpenCouture is designed for:
 
 ## Developers
 
-- **Philipp Köll www.philkoell.com
+- **Philipp Köll** www.philkoell.com
 - **Markus Ahrendt**
   
