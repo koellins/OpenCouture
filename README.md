@@ -8,10 +8,11 @@
 
 OpenCouture facilitates:
 
-- **Procedural Garment Design**: Utilize Blender's geometry nodes for algorithmic clothing creation.
+- **Procedural Garment Design**: Utilized in Blender. Ready to be modified.
 - **Real-Time Simulation**: Leverage Unreal Engine's physics for dynamic garment behavior.
 - **AR Integration**: Experience designs in augmented reality environments.
 - **Modular Architecture**: Combine Python scripts, Blender assets, and Unreal Engine projects seamlessly.
+- **Open Source Architecture**: Built from modular components – including Python scripts, avatar templates, and cloth simulation setups.
 
 ## Philosophy
 
