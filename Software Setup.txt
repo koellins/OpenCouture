@@ -1,0 +1,47 @@
+# 🛰️ Real-Time Pose Streaming to Unreal Engine 5.5
+
+This project captures real-time human pose and segmentation mask data using a webcam and streams it via UDP to Unreal Engine 5.5.
+Tested on Windows 11
+
+---
+
+## 🔧 Requirements
+
+### Software
+
+- **Python 3.11**
+- **Unreal Engine 5.5.0**
+
+### Python Libraries
+
+- `opencv-python`  # install with: `pip install opencv-python`
+- `mediapipe`    # install with: `pip install mediapipe`
+- `numpy`       # install with: `pip install numpy`
+
+### Ports
+
+Ensure these UDP ports match your setup in Unreal:
+
+- `UDP_PORT_TRACKING = 5011`  – for pose landmark data
+- `UDP_PORT_WEBCAM = 5012`    – for webcam image stream
+- `UDP_PORT_MASK = 5013`      – for segmentation mask
+
+---
+
+## 🗂️ Code Overview
+
+The script performs the following:
+- Captures webcam video frames
+- Uses MediaPipe to estimate human pose and segmentation masks
+- Streams data asynchronously via UDP in separate threads
+- Sends JSON-formatted pose data and JPEG-encoded images
+- Dynamically adjusts webcam resolution if 1080p is not available
+
+---
+
+## ⚠️ Notes
+
+- Webcam resolution targets 1920×1080; falls back to 1280×720 if unsupported.
+- Pose data includes both 2D image coordinates and 3D world coordinates.
+- The UDP image transmission uses chunking for large packets (max 60,000 bytes).
+
