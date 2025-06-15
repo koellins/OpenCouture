@@ -78,6 +78,8 @@ The script performs the following:
 
 ## ⚠️ Notes
 
+- Run Python code before opening Unreal Engine
+- Make sure, webcam is connected
 - Webcam resolution targets 1920×1080; falls back to 1280×720 if unsupported.
 - Pose data includes both 2D image coordinates and 3D world coordinates.
 - The UDP image transmission uses chunking for large packets (max 60,000 bytes).
